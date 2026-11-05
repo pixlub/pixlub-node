@@ -1,6 +1,6 @@
 {
   "name": "pixlub",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Official Node.js SDK for the Pixlub API.",
   "license": "MIT",
   "homepage": "https://pixlub.com/en/docs/api/getting-started",

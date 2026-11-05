@@ -1,5 +1,3 @@
-/** Client for the Pixlub API. */
-
 import { clock } from './clock.js'
 import { keyMask, resolveApiKey, resolveBaseUrl } from './config.js'
 import * as core from './core.js'
@@ -234,7 +232,6 @@ export class Tools {
   }
 }
 
-/** Checks the options every method takes, before anything is sent. */
 function checked<T extends RequestOptions>(options: T): T {
   if (typeof options !== 'object' || options === null) {
     throw new ConfigurationError('Options must be an object, such as { timeout: 30_000 }.')
@@ -262,7 +259,6 @@ function forcedUpload(
   throw core.errorFromResponse(refused, apiKey)
 }
 
-/** What the client knows, shared with `client.tools`. Not exported from the package. */
 class Context {
   readonly apiKey: string
   readonly baseUrl: string
@@ -306,10 +302,7 @@ class Context {
     return core.jsonBody(response, this.apiKey)
   }
 
-  /**
-   * The catalog, fetched again when `refresh` or older than ten minutes. Concurrent
-   * calls share one fetch; a call that is aborted stops waiting for it, the others do not.
-   */
+  // Concurrent calls share one fetch; an aborted call stops waiting, the others do not.
   async catalog(options: RequestOptions, refresh: boolean): Promise<readonly Tool[]> {
     const cached = this.#catalog
     if (!refresh && cached && clock.now() - cached.at < core.CATALOG_TTL_SECONDS) return cached.tools
@@ -380,7 +373,7 @@ class Context {
     return answer
   }
 
-  /** Sends the file to its upload link. False when the link expired and a new one is needed. */
+  // False when the link expired and a new one is needed.
   async putUpload(ticket: core.UploadTicket, file: PreparedFile, options: RunOptions): Promise<boolean> {
     const expired = (): boolean => clock.now() >= ticket.validUntil
     let response: RawResponse
@@ -426,7 +419,6 @@ class Context {
     }
   }
 
-  /** Downloads the outputs, a few at a time. The first failure cancels the others. */
   async downloadAll(links: readonly core.OutputLink[], options: RunOptions): Promise<ToolOutput[]> {
     const stop = new AbortController()
     const signal = options.signal ? AbortSignal.any([options.signal, stop.signal]) : stop.signal

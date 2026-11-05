@@ -19,7 +19,6 @@ function client(): Pixlub {
   return new Pixlub({ apiKey: API_KEY || PLACEHOLDER_KEY, baseURL: BASE_URL })
 }
 
-/** A valid 1x1 red PNG. */
 function tinyPng(): Buffer {
   const crcTable = Array.from({ length: 256 }, (_, n) => {
     let c = n

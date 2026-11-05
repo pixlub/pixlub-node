@@ -1,5 +1,3 @@
-/** Logic of a run, without network I/O. */
-
 import { clock } from './clock.js'
 import { redact, resolveLink } from './config.js'
 import {
@@ -27,7 +25,7 @@ import { Tool, type ToolInput, ToolOutput, type ToolOutputSpec, ToolResult } fro
 import { parseRetryAfter } from './retry.js'
 import { VERSION } from './version.js'
 
-export const USER_AGENT = `pixlub-node/${VERSION} (Node ${process.versions.node})`
+const USER_AGENT = `pixlub-node/${VERSION} (Node ${process.versions.node})`
 
 export const DEFAULT_TIMEOUT = 180_000
 export const RUN_READ_FLOOR = 70_000
@@ -36,22 +34,20 @@ export const DEFAULT_JOB_TIMEOUT = 30 * 60_000
 
 export const DIRECT_UPLOAD_MAX_BYTES = 90 * 1024 * 1024
 export const MAX_INPUT_FILES = 64
-export const MAX_OUTPUTS = MAX_INPUT_FILES * 4
+const MAX_OUTPUTS = MAX_INPUT_FILES * 4
 export const MAX_JSON_BYTES = 10 * 1024 * 1024
-export const MAX_RETRIES_LIMIT = 5
+const MAX_RETRIES_LIMIT = 5
 export const DOWNLOAD_CONCURRENCY = 4
 export const CATALOG_TTL_SECONDS = 600
 
-export const JOB_WAIT_SECONDS = 25
+const JOB_WAIT_SECONDS = 25
 export const JOB_POLL_PAUSE = 2
-export const UPLOAD_QUEUE_WAIT_SECONDS = 25
-export const UPLOAD_LINK_TTL_SECONDS = 15 * 60
+const UPLOAD_QUEUE_WAIT_SECONDS = 25
+const UPLOAD_LINK_TTL_SECONDS = 15 * 60
 
-/** Limits that tests lower. */
+// Mutable so that tests can lower them.
 export const limits = {
   directUploadMaxBytes: DIRECT_UPLOAD_MAX_BYTES,
-  // Largest output read into memory: above any image the API produces (uploaded
-  // images go up to 1 GiB). runOutputBytes: all the outputs of one run together.
   maxOutputBytes: 1024 * 1024 * 1024,
   maxRunOutputBytes: 4 * 1024 * 1024 * 1024,
 }
@@ -77,7 +73,7 @@ export function requestHeaders(apiKey: string, accept: string): Record<string, s
   return { 'x-api-key': apiKey, 'user-agent': USER_AGENT, accept }
 }
 
-/** Headers for links (results, uploads): never the API key. */
+// Links (results, uploads) never get the API key.
 export function linkHeaders(): Record<string, string> {
   return { 'user-agent': USER_AGENT, accept: '*/*' }
 }
@@ -241,7 +237,6 @@ export function encodeParams(params: unknown): string {
   return JSON.stringify(params)
 }
 
-/** Why a value would not survive JSON.stringify unchanged, if it would not. */
 function jsonProblem(value: unknown, depth: number, parents: Set<object>): string | undefined {
   if (depth > 64) return 'it is nested too deeply'
   if (value === null || typeof value === 'string' || typeof value === 'boolean') return undefined
@@ -321,7 +316,7 @@ export function uploadRequestBody(toolId: string, file: PreparedFile): BytesBody
   return new BytesBody(Buffer.from(JSON.stringify(payload)), 'application/json')
 }
 
-/** The direct limit to use (0 when not given) when a run is refused with `use_uploads`. */
+// The direct limit to use (0 when not given) after a 413 `use_uploads`.
 export function wantsUpload(response: RawResponse): number | undefined {
   const payload = response.status === 413 ? jsonObject(response.body) : undefined
   if (payload?.code !== 'use_uploads') return undefined
@@ -340,7 +335,7 @@ export interface UploadTicket {
   kind: 'ticket'
   uploadId: string
   url: string
-  /** Monotonic time (clock.now) after which the link is no longer valid. */
+  // Monotonic (clock.now), so a wrong local clock does not matter.
   validUntil: number
 }
 
@@ -378,10 +373,7 @@ export function uploadAnswer(response: RawResponse, apiKey: string, baseUrl: str
   }
 }
 
-/**
- * Seconds the link stays valid: at most 15 minutes, measured against the server's
- * clock when it sent a Date header, so a wrong local clock does not matter.
- */
+// At most 15 minutes, measured against the server's Date header when there is one.
 function linkLifetime(expiresAt: unknown, date: string | null): number {
   const expires = parseTimestamp(expiresAt)
   if (expires === undefined) return UPLOAD_LINK_TTL_SECONDS
@@ -394,7 +386,6 @@ export function uploadQueueHeaders(apiKey: string): Record<string, string> {
   return { ...requestHeaders(apiKey, 'application/json'), prefer: `wait=${UPLOAD_QUEUE_WAIT_SECONDS}` }
 }
 
-/** Seconds since the epoch, from an ISO 8601 date with a time zone (UTC when it has none). */
 export function parseTimestamp(value: unknown): number | undefined {
   if (typeof value !== 'string' || !value) return undefined
   const match = /^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2}(?::\d{2})?)(\.\d+)?(Z|[+-]\d{2}:?\d{2})?$/i.exec(value.trim())
@@ -461,7 +452,6 @@ export function jsonBody(response: RawResponse, apiKey: string): unknown {
   }
 }
 
-/** Checks the answer to an upload PUT, including the size the server says it received. */
 export function checkPut(response: RawResponse, apiKey: string, file: PreparedFile): void {
   if (response.status < 200 || response.status >= 300) throw errorFromResponse(response, apiKey)
   const received = response.tooLarge ? undefined : jsonObject(response.body)?.bytes
@@ -511,7 +501,6 @@ export function jobTimeoutError(jobId: string, timeoutMs: number): JobTimeoutErr
   )
 }
 
-/** Adds to an error what the caller must know once a run was accepted or charged. */
 export function afterAcceptance(
   error: PixlubError,
   ids: { jobId?: string | undefined; runId?: string | undefined },
@@ -582,7 +571,6 @@ export function receiptFromResponse(response: RawResponse, apiKey: string, baseU
     }
   })
 
-  // Announced sizes are checked before anything is downloaded.
   for (const link of outputs) {
     if (link.bytes !== undefined && link.bytes > limits.maxOutputBytes) {
       throw new UnexpectedResponseError(
@@ -666,7 +654,7 @@ function contentTypeOf(header: string): string {
   return (header.split(';', 1)[0] ?? '').trim().toLowerCase().slice(0, 128)
 }
 
-/** Control characters from the server become spaces, so a message cannot fake log lines. */
+// Control characters become spaces, so a server message cannot fake log lines.
 function clean(value: string): string {
   return value.replace(/[\p{Cc}]/gu, ' ')
 }

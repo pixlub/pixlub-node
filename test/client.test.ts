@@ -735,7 +735,6 @@ describe('retries', () => {
 })
 
 describe('timeouts and cancellation', () => {
-  /** A fetch that answers only when aborted. */
   function hangingFetch(calls: RequestInit[]) {
     return (_url: string, init: RequestInit): Promise<Response> => {
       calls.push(init)

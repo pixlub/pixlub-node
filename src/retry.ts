@@ -1,15 +1,14 @@
-/** Retry policy: only requests that cannot cause a second charge are retried. */
+// Only requests that cannot cause a second charge are retried.
 
-export const INITIAL_BACKOFF = 0.5
-export const MAX_BACKOFF = 8
-export const MAX_RETRY_AFTER = 60
+const INITIAL_BACKOFF = 0.5
+const MAX_BACKOFF = 8
+const MAX_RETRY_AFTER = 60
 export const UPLOAD_INCOMPLETE_ATTEMPTS = 5
-export const UPLOAD_INCOMPLETE_FIRST_PAUSE = 1
+const UPLOAD_INCOMPLETE_FIRST_PAUSE = 1
 
 const RETRYABLE_GET_STATUSES = new Set([500, 502, 503, 504])
 const RETRYABLE_PUT_STATUSES = new Set([500, 502, 503, 504, 507])
 
-/** A request that got no answer: why, and whether the server may have seen it. */
 export interface Failure {
   kind: string
   retryable: boolean
@@ -44,7 +43,6 @@ export function backoffSeconds(attempt: number, retryAfter?: number): number {
   return ceiling * (0.5 + Math.random() * 0.5)
 }
 
-/** Seconds from a Retry-After header: a number of seconds, or an HTTP date. */
 export function parseRetryAfter(value: string | null | undefined): number | undefined {
   if (!value) return undefined
   const text = value.trim()

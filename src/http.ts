@@ -1,5 +1,3 @@
-/** One request with retries, over fetch. */
-
 import { clock } from './clock.js'
 import { AbortedError, APIConnectionError, APITimeoutError } from './errors.js'
 import type { Body } from './files.js'
@@ -7,12 +5,10 @@ import { backoffSeconds, failureFor, parseRetryAfter, statusIsRetryable, type Fa
 
 export type Fetch = (input: string, init: RequestInit) => Promise<Response>
 
-/** An answer, with its body read up to a size limit. */
 export interface RawResponse {
   status: number
   headers: Headers
   body: Buffer
-  /** The body was larger than allowed and was not kept. */
   tooLarge: boolean
 }
 
@@ -20,14 +16,12 @@ export interface RequestSpec {
   method: 'GET' | 'POST' | 'PUT'
   url: string
   headers: Record<string, string>
-  /** Largest body read; a larger one gives `tooLarge`. */
   maxBytes: number
   body?: Body | undefined
-  /** Milliseconds; overrides the client's timeout. */
   timeout?: number | undefined
-  /** The answer may take this long (ms), however short the timeout. */
+  // The answer may take this long (ms), however short the timeout.
   readFloor?: number | undefined
-  /** No retry once this returns true. */
+  // No retry once this returns true.
   stop?: (() => boolean) | undefined
   signal?: AbortSignal | undefined
 }
@@ -253,7 +247,6 @@ function classify(
   })
 }
 
-/** Codes and system calls found in an error and its causes. */
 function errorCodes(error: unknown): { network: boolean; codes: string[]; syscalls: string[] } {
   const codes: string[] = []
   const syscalls: string[] = []
@@ -295,7 +288,6 @@ export function throwIfAborted(signal: AbortSignal | undefined): void {
   if (signal?.aborted) throw abortedError(signal)
 }
 
-/** The promise, or AbortedError as soon as the signal aborts. */
 export function abortable<T>(promise: Promise<T>, signal: AbortSignal | undefined): Promise<T> {
   if (!signal) return promise
   throwIfAborted(signal)
@@ -306,7 +298,6 @@ export function abortable<T>(promise: Promise<T>, signal: AbortSignal | undefine
   })
 }
 
-/** Waits `seconds`, or throws AbortedError as soon as the signal aborts. */
 export async function pause(seconds: number, signal?: AbortSignal): Promise<void> {
   throwIfAborted(signal)
   try {
@@ -317,7 +308,6 @@ export async function pause(seconds: number, signal?: AbortSignal): Promise<void
   }
 }
 
-/** Seconds to wait from a Retry-After header, or from `retry_after` in a small JSON body. */
 export function retryHint(response: RawResponse): number | undefined {
   const header = parseRetryAfter(response.headers.get('retry-after'))
   if (header !== undefined) return header

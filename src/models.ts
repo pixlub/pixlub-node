@@ -1,5 +1,3 @@
-/** Objects returned by the SDK. */
-
 import { InvalidInputError, UnexpectedResponseError } from './errors.js'
 import { extensionFor, writeOutput } from './files.js'
 

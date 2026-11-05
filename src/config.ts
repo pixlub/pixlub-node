@@ -1,5 +1,3 @@
-/** API key and base URL. */
-
 import { ConfigurationError } from './errors.js'
 
 export const API_KEY_ENV_VAR = 'PIXLUB_API_KEY'
@@ -51,7 +49,6 @@ export function resolveBaseUrl(baseURL: string | undefined): string {
   return `${url.protocol}//${url.host}${url.pathname.replace(/\/+$/, '')}`
 }
 
-/** A link sent by the API (result, upload), made absolute and checked before use. */
 export function resolveLink(link: unknown, baseUrl: string): string {
   if (typeof link !== 'string' || !link.trim()) throw new Error('empty link')
   let url: URL

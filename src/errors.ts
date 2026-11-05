@@ -1,5 +1,3 @@
-/** Errors thrown by the SDK. All extend {@link PixlubError}. */
-
 /** Base class of every error thrown by the SDK. */
 export class PixlubError extends Error {
   /** Id of the accepted run the error belongs to. The run may have been charged. */

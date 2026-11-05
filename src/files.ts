@@ -1,5 +1,3 @@
-/** Input files and streamed request bodies. */
-
 import { randomBytes } from 'node:crypto'
 import { constants as fsConstants } from 'node:fs'
 import { lstat, mkdtemp, open, rm, stat, type FileHandle } from 'node:fs/promises'
@@ -10,8 +8,8 @@ import { fileURLToPath } from 'node:url'
 import { InvalidInputError } from './errors.js'
 
 export const DEFAULT_MAX_INPUT_BYTES = 3 * 1024 * 1024 * 1024
-export const CHUNK_SIZE = 256 * 1024
-export const SOURCE_URL_MAX_LENGTH = 2048
+const CHUNK_SIZE = 256 * 1024
+const SOURCE_URL_MAX_LENGTH = 2048
 
 const UNSAFE_FILENAME_CHARS = /[\x00-\x1f\x7f"\\]/g
 const URL_FORBIDDEN_CHARS = /[\x00-\x20\x7f]/
@@ -103,7 +101,7 @@ export type ImageSource = FileSource | SourceURL
 /** One file, or a list of files for an input that takes several. */
 export type InputValue = ImageSource | readonly ImageSource[]
 
-export function checkSourceUrl(url: unknown): string {
+function checkSourceUrl(url: unknown): string {
   if (typeof url !== 'string') throw new InvalidInputError('SourceURL takes the address as a string.')
   const text = url.trim()
   if (!text || text.length > SOURCE_URL_MAX_LENGTH) {
@@ -155,7 +153,6 @@ type Content =
   | { kind: 'path'; path: string; temporary?: string }
   | { kind: 'blob'; blob: Blob }
 
-/** A file read and measured before anything is sent. */
 export class PreparedFile {
   readonly formName: string
   readonly filename: string
@@ -178,7 +175,6 @@ export class PreparedFile {
     }
   }
 
-  /** The bytes, in chunks. Fails with InvalidInputError when the file shrank meanwhile. */
   async *chunks(): AsyncGenerator<Uint8Array> {
     const content = this.#content
     if (content.kind === 'data') {
@@ -395,7 +391,6 @@ function reason(error: unknown): string {
   return 'unknown error'
 }
 
-/** A request body of known length, sent in chunks. */
 export interface Body {
   readonly contentType: string
   readonly length: number
@@ -464,7 +459,6 @@ export class MultipartBody implements Body {
   }
 }
 
-/** Writes `content` to `path`, readable by its owner only. Refuses to replace a file unless `overwrite`. */
 export async function writeOutput(path: string, content: Uint8Array, overwrite: boolean): Promise<string> {
   if (overwrite) {
     try {

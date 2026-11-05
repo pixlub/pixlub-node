@@ -190,7 +190,6 @@ describe('long runs', () => {
 })
 
 describe('read floors', () => {
-  /** Answers after `ms` of real time. */
   function slow(ms: number, answer: () => Response) {
     return () => new Promise<Response>(resolve => setTimeout(() => resolve(answer()), ms))
   }

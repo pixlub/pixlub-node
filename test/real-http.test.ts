@@ -48,7 +48,6 @@ function json(res: ServerResponse, payload: unknown, status = 200): void {
   res.end(JSON.stringify(payload))
 }
 
-/** Plays the API, the upload server and the result links on one port. */
 function fakePixlub(base: () => string): Handler {
   return (seen, res) => {
     if (seen.method === 'GET' && seen.path === '/v1/modules') return json(res, CATALOG)

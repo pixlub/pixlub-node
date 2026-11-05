@@ -1,5 +1,3 @@
-/** A fake Pixlub API behind a fetch function, and a fake clock. */
-
 import { randomUUID } from 'node:crypto'
 import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -193,7 +191,6 @@ export function succeeded(extra: Record<string, Json> = {}): Response {
   })
 }
 
-/** A network failure as fetch reports it: a TypeError whose cause carries the code. */
 export function networkError(code: string, syscall?: string): TypeError {
   const cause = Object.assign(new Error(code), { code, ...(syscall ? { syscall } : {}) })
   return new TypeError('fetch failed', { cause })
@@ -321,7 +318,7 @@ export function parseMultipart(request: Recorded): Record<string, Part> {
   return Object.fromEntries(parseMultipartAll(request))
 }
 
-/** Fake time: sleeps return at once and are recorded, in seconds. */
+// Sleeps return at once and are recorded, in seconds.
 export const fakeTime = { now: 1000, wall: Date.parse('2026-10-13T09:00:00Z') / 1000, waits: [] as number[] }
 
 const realClock = { ...clock }
@@ -350,7 +347,6 @@ afterEach(() => {
   for (const folder of folders.splice(0)) rmSync(folder, { recursive: true, force: true })
 })
 
-/** A new temporary folder, removed after the test. */
 export function tempDir(): string {
   const folder = mkdtempSync(join(tmpdir(), 'pixlub-test-'))
   folders.push(folder)
@@ -361,7 +357,6 @@ export function makeClient(api: FakeApi, options: ClientOptions = {}): Pixlub {
   return new Pixlub({ apiKey: API_KEY, baseURL: BASE_URL, fetch: api.fetch, ...options })
 }
 
-/** Lowers the size above which a run goes through an upload. */
 export function smallDirectLimit(limit = 100): number {
   limits.directUploadMaxBytes = limit
   return limit

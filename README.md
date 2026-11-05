@@ -1,7 +1,3 @@
-
-
-https://github.com/user-attachments/assets/6228d1b9-92e2-4486-913a-722dea47978c
-
 # pixlub
 
 Official Node.js SDK for the [Pixlub](https://pixlub.com) API. Node.js 22+,
@@ -9,6 +5,10 @@ ES modules and CommonJS, TypeScript types included, no dependencies.
 
 Documentation: [getting started with the API](https://pixlub.com/en/docs/api/getting-started)
 and [every module, its inputs and settings](https://pixlub.com/en/docs/modules).
+
+<video src="https://github.com/user-attachments/assets/6228d1b9-92e2-4486-913a-722dea47978c" controls muted width="100%">
+  <a href="https://github.com/user-attachments/assets/6228d1b9-92e2-4486-913a-722dea47978c"><img src="https://raw.githubusercontent.com/pixlub/pixlub-node/main/docs/demo.webp" alt="Install pixlub, write a script, run a real request and get the cut-out"></a>
+</video>
 
 ## Install
 
