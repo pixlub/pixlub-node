@@ -1,0 +1,52 @@
+{
+  "name": "pixlub",
+  "version": "0.1.0",
+  "description": "Official Node.js SDK for the Pixlub API.",
+  "license": "MIT",
+  "homepage": "https://pixlub.com/en/docs/api/getting-started",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pixlub/pixlub-node.git"
+  },
+  "bugs": {
+    "url": "https://github.com/pixlub/pixlub-node/issues"
+  },
+  "keywords": ["pixlub", "image", "api", "sdk", "background-removal"],
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json && node scripts/cjs-package.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "check": "npm run typecheck && npm test && npm run build && node scripts/smoke.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "~5.9.3",
+    "vitest": "^4.1.11"
+  }
+}
